@@ -61,6 +61,7 @@
     {%- if it.discussion %} · <a href="{{ it.discussion }}" style="color:#857d6e;">discusión{% if it.comments %} ({{ it.comments }}){% endif %}</a>{% endif %}</div>
   {%- if it.resumen %}<div style="font-family:{{ sans }};font-size:15px;line-height:1.5;color:#2b2b2b;">{{ it.resumen }}</div>{% endif %}
   {%- if it.por_que %}<div style="font-family:{{ sans }};font-size:14px;line-height:1.5;color:#6b4a1f;margin-top:4px;"><b>Por qué importa:</b> {{ it.por_que }}</div>{% endif %}
+  <div style="font-family:{{ sans }};font-size:13px;margin-top:6px;"><a href="{{ it.url }}" style="color:#9b1c1c;font-weight:700;text-decoration:none;">Leer en {{ it.source }} →</a></div>
 </td></tr>
 {%- endfor %}
 {%- endfor %}

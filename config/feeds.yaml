@@ -45,7 +45,7 @@ sections:
     description: "Lo que está en boca de todos en la comunidad técnica"
     max_items: 5
     evening: true
-    evening_max_items: 3
+    evening_max_items: 5
     feeds:
       - { url: "https://hnrss.org/frontpage?points=150", name: "Hacker News", weight: 1.3 }
       - { url: "https://lobste.rs/rss", name: "Lobsters" }
@@ -57,7 +57,7 @@ sections:
     description: "Vulnerabilidades explotadas activamente, incidentes y avisos que afectan tu stack"
     max_items: 5
     evening: true
-    evening_max_items: 3
+    evening_max_items: 5
     feeds:
       - { type: kev, weight: 2.5 }   # CISA Known Exploited Vulnerabilities (JSON oficial)
       - { url: "https://kubernetes.io/docs/reference/issues-security/official-cve-feed/feed.xml", name: "Kubernetes CVE feed", weight: 2.0 }
@@ -143,7 +143,7 @@ sections:
     description: "Modelos, inferencia, evals, agentes, MCP y operación de LLMs en producción"
     max_items: 5
     evening: true
-    evening_max_items: 2
+    evening_max_items: 5
     feeds:
       - { url: "https://simonwillison.net/atom/everything/", name: "Simon Willison", weight: 1.3 }
       - { url: "https://www.latent.space/feed", name: "Latent Space" }
