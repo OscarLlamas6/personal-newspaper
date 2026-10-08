@@ -1,0 +1,92 @@
+name: El Stack Diario
+
+on:
+  schedule:
+    # Horas en UTC. Ejemplo: 11:05 UTC = 6:05 am en UTC-5 (Bogotá/Lima/CDMX en horario estándar).
+    - cron: "5 11 * * *"     # edición matutina (completa)
+    - cron: "5 23 * * *"     # edición vespertina (solo lo urgente) — bórrala si prefieres 1 correo
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: "Edición"
+        type: choice
+        options: [morning, evening]
+        default: morning
+      dry_run:
+        description: "Solo generar (no enviar correo)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stack-diario
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Recupera la lista de noticias ya enviadas para no repetirlas.
+      - name: Restaurar estado
+        uses: actions/cache/restore@v4
+        with:
+          path: state
+          key: seen-${{ github.run_id }}
+          restore-keys: seen-
+
+      - name: Elegir edición
+        id: ed
+        run: |
+          if [ -n "${{ inputs.edition }}" ]; then
+            echo "edition=${{ inputs.edition }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "5 23 * * *" ]; then
+            echo "edition=evening" >> "$GITHUB_OUTPUT"
+          else
+            echo "edition=morning" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generar y enviar
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+        run: |
+          mkdir -p state
+          python -m digest.main --edition "${{ steps.ed.outputs.edition }}" ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Guardar estado
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state
+          key: seen-${{ github.run_id }}
+
+      # Archivo de los periódicos (descargables desde la pestaña Actions durante 30 días).
+      - name: Archivar HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stack-diario-${{ steps.ed.outputs.edition }}-${{ github.run_id }}
+          path: out/*.html
+          retention-days: 30
+          if-no-files-found: ignore

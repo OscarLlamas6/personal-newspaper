@@ -1,0 +1,231 @@
+# =====================================================================
+#  El Stack Diario — configuración de fuentes
+#  Edita libremente: agrega/quita feeds, cambia cuántas noticias por sección.
+#  Ejecuta `python -m digest.main --check-feeds` para validar las URLs.
+#  Las marcadas con "# verificar" son URLs que pueden haber cambiado.
+# =====================================================================
+
+settings:
+  timezone: "UTC"              # p.ej. America/Bogota, America/Mexico_City, Europe/Madrid
+  window_hours: 26             # edición matutina: qué tan atrás mirar
+  evening_window_hours: 12     # edición vespertina
+  candidates_per_section: 25   # cuántas candidatas ve el LLM por sección
+
+# Quién eres: el LLM usa esto para decidir qué te importa.
+profile: >
+  Ingeniero de software senior con muy poco tiempo (padre reciente, 3 trabajos).
+  Áreas: Data Engineering, MLOps, DevSecOps/DevOps, Cloud (AWS/Azure/GCP), Cloud Native,
+  Kubernetes, SRE/SysAdmin, Platform Engineering, observabilidad, LLMOps, sistemas agénticos,
+  GenAI, sistemas distribuidos, Linux, seguridad, automatización, Harness.
+  Lenguajes: Go, Python, Bash, Rust, Elixir, Zig, Erlang, TypeScript.
+  Virtualización: Proxmox, Nutanix, CloudStack, VMware.
+  No busca ser experto en todo: quiere saber qué es nuevo, qué está en boca de todos y qué
+  merece estar en su radar.
+
+# Palabras que suben el puntaje de una noticia (y filtran fuentes genéricas).
+interests:
+  [kubernetes, k8s, helm, argo, argocd, flux, terraform, opentofu, pulumi, ansible, crossplane,
+   docker, container, containers, podman, ebpf, cilium, istio, envoy, wasm, webassembly,
+   prometheus, grafana, opentelemetry, otel, observability, tracing, sre, incident, postmortem, outage,
+   platform engineering, backstage, internal developer platform, devsecops, devops, gitops, ci/cd,
+   github actions, supply chain, sbom, sigstore, slsa, cve, zero-day, vulnerability, exploit, ransomware,
+   aws, azure, gcp, google cloud, lambda, eks, aks, gke, serverless, s3, bedrock, vertex,
+   kafka, flink, spark, airflow, dagster, dbt, iceberg, delta lake, duckdb, clickhouse, postgres, postgresql,
+   data engineering, lakehouse, mlops, mlflow, kubeflow, ray, vllm, llm, llms, llmops, rag, agent, agents,
+   agentic, mcp, model context protocol, langchain, langgraph, inference, fine-tuning, evals, gpu,
+   golang, rust, python, typescript, elixir, erlang, beam, zig, bash, shell,
+   linux, kernel, systemd, proxmox, nutanix, cloudstack, vmware, kvm, qemu, hypervisor,
+   distributed systems, raft, consensus, harness, automation, certification, cka, ckad, cks]
+
+sections:
+
+  - id: portada
+    title: "Lo más comentado"
+    emoji: "🔥"
+    description: "Lo que está en boca de todos en la comunidad técnica"
+    max_items: 5
+    evening: true
+    evening_max_items: 3
+    feeds:
+      - { url: "https://hnrss.org/frontpage?points=150", name: "Hacker News", weight: 1.3 }
+      - { url: "https://lobste.rs/rss", name: "Lobsters" }
+      - { url: "https://hnrss.org/show?points=100", name: "Show HN" }
+
+  - id: seguridad
+    title: "Seguridad y CVEs"
+    emoji: "🚨"
+    description: "Vulnerabilidades explotadas activamente, incidentes y avisos que afectan tu stack"
+    max_items: 5
+    evening: true
+    evening_max_items: 3
+    feeds:
+      - { type: kev, weight: 2.5 }   # CISA Known Exploited Vulnerabilities (JSON oficial)
+      - { url: "https://kubernetes.io/docs/reference/issues-security/official-cve-feed/feed.xml", name: "Kubernetes CVE feed", weight: 2.0 }
+      - { url: "https://feeds.feedburner.com/TheHackersNews", name: "The Hacker News", require_keywords: true }
+      - { url: "https://www.bleepingcomputer.com/feed/", name: "BleepingComputer", require_keywords: true }
+      - { url: "https://krebsonsecurity.com/feed/", name: "Krebs on Security" }
+      - { url: "https://www.cisa.gov/cybersecurity-advisories/all.xml", name: "CISA Advisories", require_keywords: true, optional: true }  # a veces bloquea bots
+      - { url: "https://seclists.org/rss/oss-sec.rss", name: "oss-security", require_keywords: true, weight: 0.8 }
+
+  - id: cloud
+    title: "Cloud: AWS · Azure · GCP"
+    emoji: "☁️"
+    description: "Lanzamientos, cambios de precio/servicio y deprecaciones en los tres grandes"
+    max_items: 4
+    feeds:
+      - { url: "https://aws.amazon.com/about-aws/whats-new/recent/feed/", name: "AWS What's New", weight: 0.8 }
+      - { url: "https://aws.amazon.com/blogs/aws/feed/", name: "AWS News Blog" }
+      - { url: "https://www.lastweekinaws.com/feed/", name: "Last Week in AWS" }
+      - { url: "https://www.microsoft.com/releasecommunications/api/v2/azure/rss", name: "Azure Updates", weight: 0.8 }
+      - { url: "https://azure.microsoft.com/en-us/blog/feed/", name: "Azure Blog" }
+      - { url: "https://cloudblog.withgoogle.com/rss/", name: "Google Cloud Blog" }
+      - { url: "https://cloud.google.com/feeds/gcp-release-notes.xml", name: "GCP Release Notes", weight: 0.7 }
+
+  - id: cloudnative
+    title: "Kubernetes y Cloud Native"
+    emoji: "☸️"
+    description: "Kubernetes, CNCF, GitOps, service mesh, eBPF e IaC"
+    max_items: 4
+    feeds:
+      - { url: "https://kubernetes.io/feed.xml", name: "Kubernetes Blog", weight: 1.2 }
+      - { url: "https://www.cncf.io/feed/", name: "CNCF" }
+      - { url: "https://thenewstack.io/feed/", name: "The New Stack", require_keywords: true }
+      - type: github_releases
+        repos: [kubernetes/kubernetes, argoproj/argo-cd, fluxcd/flux2, cilium/cilium, istio/istio,
+                helm/helm, opentofu/opentofu, crossplane/crossplane, containerd/containerd]
+      - { type: devto, tags: [kubernetes, cloudnative] }
+
+  - id: plataforma
+    title: "DevOps, SRE y Platform Engineering"
+    emoji: "🛠️"
+    description: "Prácticas, herramientas de plataforma, CI/CD, incidentes y postmortems"
+    max_items: 4
+    feeds:
+      - { url: "https://sreweekly.com/feed/", name: "SRE Weekly", weight: 1.2 }
+      - { url: "https://feed.infoq.com/", name: "InfoQ", require_keywords: true }
+      - { url: "https://github.blog/changelog/feed/", name: "GitHub Changelog", weight: 0.8 }
+      - { url: "https://platformengineering.org/blog/rss.xml", name: "PlatformEngineering.org" }
+      - { url: "https://www.harness.io/blog/rss.xml", name: "Harness Blog" }
+      - { type: hn_search, queries: [postmortem, "platform engineering", harness, terraform], points: 40 }
+      - { type: devto, tags: [devops, sre, platformengineering, automation] }
+      - { type: medium, tags: [devops, site-reliability-engineering] }
+      - { type: reddit, subs: [devops, sre] }
+
+  - id: observabilidad
+    title: "Monitoreo y Observabilidad"
+    emoji: "📈"
+    description: "OpenTelemetry, Prometheus, Grafana, eBPF y tracing"
+    max_items: 2
+    feeds:
+      - { url: "https://opentelemetry.io/blog/index.xml", name: "OpenTelemetry Blog" }
+      - { url: "https://grafana.com/blog/index.xml", name: "Grafana Blog" }
+      - type: github_releases
+        repos: [prometheus/prometheus, grafana/grafana, open-telemetry/opentelemetry-collector-releases]
+      - { type: devto, tags: [observability, monitoring] }
+
+  - id: data
+    title: "Data Engineering y MLOps"
+    emoji: "🗄️"
+    description: "Pipelines, lakehouse, formatos abiertos, orquestación y operación de modelos"
+    max_items: 4
+    feeds:
+      - { url: "https://www.dataengineeringweekly.com/feed", name: "Data Engineering Weekly", weight: 1.2 }
+      - { url: "https://www.startdataengineering.com/index.xml", name: "Start Data Engineering", optional: true }
+      - type: github_releases
+        repos: [apache/airflow, apache/iceberg, duckdb/duckdb, dagster-io/dagster, mlflow/mlflow, ray-project/ray]
+      - { type: hn_search, queries: [duckdb, iceberg, "data engineering", mlops], points: 40 }
+      - { type: devto, tags: [dataengineering, mlops] }
+      - { type: reddit, subs: [dataengineering, mlops] }
+
+  - id: ia
+    title: "GenAI, LLMOps y Sistemas Agénticos"
+    emoji: "🤖"
+    description: "Modelos, inferencia, evals, agentes, MCP y operación de LLMs en producción"
+    max_items: 5
+    evening: true
+    evening_max_items: 2
+    feeds:
+      - { url: "https://simonwillison.net/atom/everything/", name: "Simon Willison", weight: 1.3 }
+      - { url: "https://www.latent.space/feed", name: "Latent Space" }
+      - { url: "https://huggingface.co/blog/feed.xml", name: "Hugging Face" }
+      - type: github_releases
+        repos: [vllm-project/vllm, ollama/ollama, langchain-ai/langgraph, modelcontextprotocol/python-sdk]
+      - { type: hn_search, queries: [LLM, agents, MCP, inference], points: 80 }
+      - { type: devto, tags: [llm, genai] }
+      - { type: reddit, subs: [LocalLLaMA] }
+
+  - id: lenguajes
+    title: "Lenguajes: Go · Python · Rust · Elixir · Zig · Erlang · TS · Bash"
+    emoji: "💻"
+    description: "Releases, propuestas y herramientas de los lenguajes que usas"
+    max_items: 4
+    feeds:
+      - { url: "https://go.dev/blog/feed.atom", name: "Go Blog", weight: 1.3 }
+      - { url: "https://blog.python.org/rss.xml", name: "Python Insider", weight: 1.2 }
+      - { url: "https://blog.rust-lang.org/feed.xml", name: "Rust Blog", weight: 1.3 }
+      - { url: "https://this-week-in-rust.org/atom.xml", name: "This Week in Rust" }
+      - { url: "https://elixir-lang.org/atom.xml", name: "Elixir Blog", weight: 1.3 }
+      - { url: "https://ziglang.org/news/index.xml", name: "Zig News", weight: 1.3 }
+      - { url: "https://devblogs.microsoft.com/typescript/feed/", name: "TypeScript Blog", weight: 1.2 }
+      - type: github_releases
+        repos: [erlang/otp, astral-sh/uv, astral-sh/ruff]
+      - { url: "https://lobste.rs/t/go,rust,elixir,erlang,zig,python,javascript.rss", name: "Lobsters (lenguajes)", optional: true }
+      - { type: reddit, subs: [golang, rust, elixir, Zig] }
+
+  - id: distribuidos
+    title: "Sistemas Distribuidos y Arquitectura"
+    emoji: "🧩"
+    description: "Consenso, bases de datos, arquitectura y papers aplicados"
+    max_items: 2
+    feeds:
+      - { url: "https://muratbuffalo.blogspot.com/feeds/posts/default", name: "Metadata (Murat Demirbas)", weight: 1.2 }
+      - { url: "https://martinfowler.com/feed.atom", name: "Martin Fowler" }
+      - { type: hn_search, queries: ["distributed systems", consensus, raft], points: 30 }
+      - { type: devto, tags: [distributedsystems, architecture] }
+
+  - id: infra
+    title: "Linux y Virtualización"
+    emoji: "🐧"
+    description: "Kernel, distros, Proxmox, Nutanix, CloudStack, VMware/Broadcom"
+    max_items: 3
+    feeds:
+      - { url: "https://lwn.net/headlines/newrss", name: "LWN", weight: 1.2 }
+      - { url: "https://www.kernel.org/feeds/kdist.xml", name: "kernel.org releases", weight: 0.6 }
+      - { url: "https://www.phoronix.com/rss.php", name: "Phoronix", weight: 0.8 }
+      - { url: "https://forum.proxmox.com/forums/announcements.7/index.rss", name: "Proxmox Announcements", weight: 1.5 }
+      - type: github_releases
+        repos: [apache/cloudstack]
+      - { type: hn_search, queries: [proxmox, nutanix, vmware, cloudstack], points: 20 }
+      - { type: reddit, subs: [Proxmox, sysadmin] }
+
+  - id: trending
+    title: "Proyectos en tendencia (GitHub)"
+    emoji: "⭐"
+    description: "Repos que están ganando estrellas hoy en tus lenguajes"
+    max_items: 4
+    max_per_source: 2
+    feeds:
+      - { type: trending, langs: [all, go, python, rust, typescript, elixir, zig, shell] }
+
+  - id: comunidad
+    title: "Lecturas de la comunidad"
+    emoji: "📰"
+    description: "Los mejores posts de Medium, dev.to y foros (filtrando el relleno)"
+    max_items: 3
+    feeds:
+      - { type: medium, tags: [software-engineering, kubernetes, data-engineering, distributed-systems, golang, rust] }
+      - { type: devto, tags: [go, rust, python, aws, security, linux] }
+      - { type: reddit, subs: [programming, kubernetes, aws] }
+
+  - id: certificaciones
+    title: "Certificaciones"
+    emoji: "🎓"
+    description: "Cambios de exámenes, nuevas certificaciones, retiros y descuentos"
+    max_items: 2
+    weekdays: [0]          # solo los lunes (0 = lunes)
+    window_hours: 168      # mira la última semana
+    feeds:
+      - { url: "https://aws.amazon.com/blogs/training-and-certification/feed/", name: "AWS Training & Certification" }
+      - { url: "https://training.linuxfoundation.org/feed/", name: "Linux Foundation Training", require_keywords: true }
+      - { type: hn_search, queries: [certification], points: 15 }
+      - { type: devto, tags: [certification] }

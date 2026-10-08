@@ -1,0 +1,78 @@
+{%- set serif = "Georgia,'Times New Roman',Times,serif" -%}
+{%- set sans = "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" -%}
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<title>El Stack Diario</title>
+</head>
+<body style="margin:0;padding:0;background:#ebe6db;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ebe6db;">
+<tr><td align="center" style="padding:16px 8px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:680px;background:#fbf9f4;border:1px solid #d6cfbf;">
+
+{%- if demo %}
+<tr><td style="background:#9b1c1c;color:#ffffff;font-family:{{ sans }};font-size:12px;font-weight:600;letter-spacing:1px;padding:7px 24px;text-align:center;">VISTA PREVIA · DATOS DE EJEMPLO FICTICIOS</td></tr>
+{%- endif %}
+
+<tr><td style="padding:26px 24px 14px;text-align:center;border-bottom:3px double #1a1a1a;">
+  <div style="font-family:{{ sans }};font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7a7263;">{{ edicion }}</div>
+  <div style="font-family:{{ serif }};font-size:42px;line-height:1.05;font-weight:700;color:#1a1a1a;margin:8px 0 10px;">El Stack Diario</div>
+  <div style="font-family:{{ sans }};font-size:12px;color:#5f584b;border-top:1px solid #1a1a1a;padding-top:7px;">{{ fecha }} &nbsp;·&nbsp; {{ n_items }} noticias &nbsp;·&nbsp; ~{{ lectura_min }} min de lectura</div>
+</td></tr>
+
+{%- if titulares %}
+<tr><td style="padding:20px 24px 6px;">
+  <div style="font-family:{{ sans }};font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#9b1c1c;font-weight:700;margin-bottom:8px;">Si solo tienes 2 minutos</div>
+  {%- for t in titulares %}
+  <div style="font-family:{{ serif }};font-size:17px;line-height:1.45;color:#1a1a1a;padding:6px 0;{% if not loop.last %}border-bottom:1px dotted #cfc7b5;{% endif %}">{{ t }}</div>
+  {%- endfor %}
+</td></tr>
+{%- endif %}
+
+{%- if explorar %}
+<tr><td style="padding:14px 24px 8px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f2ecdf;border-left:4px solid #9b1c1c;">
+  <tr><td style="padding:14px 16px;">
+    <div style="font-family:{{ sans }};font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#9b1c1c;font-weight:700;">Si tienes 20 minutos</div>
+    <a href="{{ explorar.url }}" style="display:block;font-family:{{ serif }};font-size:19px;line-height:1.3;font-weight:700;color:#1a1a1a;text-decoration:none;margin:6px 0 6px;">{{ explorar.title }}</a>
+    <div style="font-family:{{ sans }};font-size:14px;line-height:1.5;color:#2b2b2b;">{{ explorar.por_que }}</div>
+    {%- if explorar.plan %}<div style="font-family:{{ sans }};font-size:14px;line-height:1.5;color:#2b2b2b;margin-top:6px;"><b>Plan:</b> {{ explorar.plan }}</div>{% endif %}
+  </td></tr></table>
+</td></tr>
+{%- endif %}
+
+{%- for s in secciones %}
+<tr><td style="padding:22px 24px 4px;">
+  <div style="border-top:2px solid #1a1a1a;padding-top:8px;font-family:{{ sans }};font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:800;color:#1a1a1a;">{{ s.emoji }} {{ s.title }}</div>
+  {%- if s.trend %}<div style="font-family:{{ serif }};font-style:italic;font-size:14px;line-height:1.45;color:#5f584b;margin-top:6px;">{{ s.trend }}</div>{% endif %}
+</td></tr>
+{%- for it in s["items"] %}
+<tr><td style="padding:10px 24px 12px;{% if not loop.last %}border-bottom:1px solid #e4ddcd;{% endif %}">
+  <a href="{{ it.url }}" style="font-family:{{ serif }};font-size:18px;line-height:1.3;font-weight:700;color:#1a1a1a;text-decoration:none;">{{ it.title }}</a>
+  <div style="font-family:{{ sans }};font-size:12px;color:#857d6e;margin:4px 0 5px;">{{ it.source }}
+    {%- if it.tag_label %} · {{ it.tag_emoji }} {{ it.tag_label }}{% endif %}
+    {%- if it.ransomware %} · <b style="color:#9b1c1c;">usado en ransomware</b>{% endif %}
+    {%- if it.points %} · ▲ {{ it.points }}{% endif %}
+    {%- if it.buzz %} · en {{ it.buzz + 1 }} fuentes{% endif %}
+    {%- if it.discussion %} · <a href="{{ it.discussion }}" style="color:#857d6e;">discusión{% if it.comments %} ({{ it.comments }}){% endif %}</a>{% endif %}</div>
+  {%- if it.resumen %}<div style="font-family:{{ sans }};font-size:15px;line-height:1.5;color:#2b2b2b;">{{ it.resumen }}</div>{% endif %}
+  {%- if it.por_que %}<div style="font-family:{{ sans }};font-size:14px;line-height:1.5;color:#6b4a1f;margin-top:4px;"><b>Por qué importa:</b> {{ it.por_que }}</div>{% endif %}
+</td></tr>
+{%- endfor %}
+{%- endfor %}
+
+<tr><td style="padding:22px 24px 24px;border-top:3px double #1a1a1a;font-family:{{ sans }};font-size:11px;line-height:1.6;color:#857d6e;text-align:center;">
+  {{ stats.fuentes }} fuentes revisadas · {{ stats.candidatas }} candidatas · {{ n_items }} publicadas{% if stats.llm %} · editor: {{ stats.llm }}{% else %} · modo sin LLM{% endif %}
+  {%- if stats.fallidas %}<br>Sin respuesta hoy: {{ stats.fallidas | join(", ") }}{% endif %}
+  <br>El Stack Diario · tu periódico personal, open source
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
