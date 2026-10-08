@@ -24,10 +24,12 @@ import json
 import logging
 import math
 import os
+import random
 import re
 import smtplib
 import ssl
 import sys
+import threading
 import time
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
@@ -199,10 +201,40 @@ def select_sections(cfg: dict, edition: str, local_now: dt.datetime) -> list[dic
 
 # ----------------------------------------------------------------------------- descarga
 
-def http_get(url: str, timeout: int = 25) -> requests.Response:
-    r = requests.get(url, headers={"User-Agent": UA, "Accept": "*/*"}, timeout=timeout)
-    r.raise_for_status()
-    return r
+# Pausa mínima (s) entre peticiones al mismo host, para no disparar límites de tasa.
+HOST_GAP = {"www.reddit.com": 3.0, "hnrss.org": 1.0, "medium.com": 1.0, "dev.to": 0.5}
+_host_lock = threading.Lock()
+_host_next: dict[str, float] = {}
+
+
+def _throttle(url: str) -> None:
+    host = urlparse(url).netloc
+    gap = HOST_GAP.get(host, 0.0)
+    if not gap:
+        return
+    with _host_lock:  # reserva el siguiente turno del host y espera fuera del lock
+        now = time.monotonic()
+        slot = max(now, _host_next.get(host, 0.0))
+        _host_next[host] = slot + gap
+    time.sleep(max(0.0, slot - now))
+
+
+def http_get(url: str, timeout: int = 25, retries: int = 2) -> requests.Response:
+    for attempt in range(retries + 1):
+        _throttle(url)
+        try:
+            r = requests.get(url, headers={"User-Agent": UA, "Accept": "*/*"}, timeout=timeout)
+            if (r.status_code == 429 or r.status_code >= 500) and attempt < retries:
+                wait = int(r.headers.get("retry-after", 0) or 0) if r.headers.get("retry-after", "").isdigit() else 0
+                time.sleep(min(wait or 4 * (attempt + 1), 20) + random.random())
+                continue
+            r.raise_for_status()
+            return r
+        except (requests.Timeout, requests.ConnectionError):
+            if attempt >= retries:
+                raise
+            time.sleep(2 * (attempt + 1) + random.random())
+    raise RuntimeError("unreachable")
 
 
 def parse_rss(cfg: dict) -> list[Item]:
