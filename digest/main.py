@@ -588,7 +588,7 @@ def build_ctx(*, local_now, edition, out_sections, titulares, explorar, stats, d
 
 def send_email(subject: str, html_body: str, text_body: str) -> None:
     host, port = os.environ["SMTP_HOST"], int(os.getenv("SMTP_PORT", "465"))
-    user, pwd = os.environ["SMTP_USER"], os.environ["SMTP_PASS"]
+    user, pwd = os.environ["SMTP_USER"].strip(), "".join(os.environ["SMTP_PASS"].split())  # Google la muestra con espacios
     to = [a.strip() for a in os.environ["MAIL_TO"].split(",") if a.strip()]
     sender = os.getenv("MAIL_FROM") or user
     msg = MIMEMultipart("alternative")
